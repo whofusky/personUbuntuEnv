@@ -1,0 +1,418 @@
+#!/bin/bash
+#
+#############################################################################
+#author       :    fushikai
+#date         :    20200901
+#linux_version:    Ubuntu 20.04.1 LTS 
+#dsc          :
+#   根据脚本提示交互联ftp服务器进行操作(需要有expect工具支持,否则无法运行)
+#    
+#revision history:
+#
+#############################################################################
+
+#软件版本号
+MYVERNO="v0.0.0.1"
+versionNo="software version number:${MYVERNO}"
+
+which expect >/dev/null 2>&1
+stat=$?
+if [ ${stat} -ne 0 ];then
+    echo -e "\n\t 此脚本需要expect工具支持,未检测到此工具存在!\n"
+    exit 1
+fi
+
+
+allExName="$0"
+exeName="${allExName##*/}"
+
+#echo "allExName=[${allExName}],exeName=[${exeName}]"
+
+function F_Tips()
+{
+    echo -e "\n 只一种用法:"
+    echo -e "\t ${exeName}   #根据提示进行操作即可\n"
+    return 0
+}
+
+
+if [ $# -ge 1 ];then
+    F_Tips
+    exit 0
+fi
+
+#定义常用的ip,以便减少输入
+preIps[0]="42.121.65.50";    prePor[0]=21; preUsers[0]="yc1";      prePwds[0]="1qaz2wsx"
+preIps[1]="182.254.227.250"; prePor[1]=21; preUsers[1]="forcast2"; prePwds[1]="zfmd20130409"
+
+preNums=${#preIps[*]}
+
+#定义ftp连接需要的参数,同时赋于默认值
+ftpSerIp="${preIps[0]}"
+ftpCtlPort="${prePor[0]}"
+ftpUser="${preUsers[0]}"
+ftpPwd="${prePwds[0]}"
+transType="ascii" #ascii  binary
+conMode="-p" #passive:-p   active:-A
+conMStr="passive"
+
+conTipStr=""
+fixPreStr=""
+
+for((i=0;i<${preNums};i++))
+do
+    fixPreStr="${fixPreStr}\n\t[${i}]. ip=${preIps[$i]}, port=${prePor[$9]}, user=${preUsers[$i]}"
+done
+
+ipFlag=0
+portFlag=0
+userFlag=0
+pwdFlag=0
+trTypeFlag=0
+cnMdFlag=0
+
+function setIpFlag()
+{
+    ipFlag=1
+    return 0
+}
+
+function setPortFlag()
+{
+    portFlag=1
+    return 0
+}
+
+function setUserFlag()
+{
+    userFlag=1
+    return 0
+}
+
+function setPwdFlag()
+{
+    pwdFlag=1
+    return 0
+}
+
+function setTrTypeFlag()
+{
+    trTypeFlag=1
+    return 0
+}
+
+function setCnMdFlag()
+{
+    cnMdFlag=1
+    return 0
+}
+
+function F_getFixPre()
+{
+    local preMaxIdx=$(echo "${preNums} -1"|bc)
+    if [ ${preMaxIdx} -lt 0 ];then
+        echo -e "\n\t 没有预定义的ip值\n"
+        exit 1
+    fi
+
+    local tIdx
+    local tnum
+
+    while :
+    do
+        read -p "    请输入0-${preMaxIdx}来选择对应的预定义配置or 直接回车选择第0条 or input \"x\" to exit! " tIdx
+        [ "x${tIdx}" = "xx" ] && echo -e "\n" && exit 0
+        if [ "x${tIdx}" = "x" ];then
+            tIdx=0
+            break
+        fi
+        tnum=$(echo "${tIdx}"|sed -n '/^[0-9]*[0-9]$/p'|wc -l)
+        [ ${tnum} -eq 0 ] && continue
+        [ ${tIdx} -gt ${preMaxIdx} ] && continue
+
+        break
+    done
+
+    #echo "tIdx=[${tIdx}]"
+
+    ftpSerIp="${preIps[${tIdx}]}"
+    ftpCtlPort="${prePor[${tIdx}]}"
+    ftpUser="${preUsers[${tIdx}]}"
+    ftpPwd="${prePwds[${tIdx}]}"
+
+    setIpFlag
+    setPortFlag
+    setUserFlag
+    setPwdFlag
+
+    return 0
+}
+
+
+
+
+function F_getip()
+{
+    [ ${ipFlag} -eq 1 ] && return 0
+
+    local tIp
+    local tyes
+
+    while :
+    do
+        read -p "    请输入IP: " tIp
+        echo -e "\n\t你输入的IP是:[ ${tIp} ]\n"
+        read -p "    确认请输入y(其他值进行重新输入): " tyes
+        [[ "${tyes}x" = "yx" || "${tyes}x" = "Yx" ]] && break
+    done
+    ftpSerIp=${tIp}
+    #echo "ftpSerIp=[${ftpSerIp}]"
+    setIpFlag
+
+    return 0
+}
+
+
+
+function F_getUser()
+{
+    [ ${userFlag} -eq 1 ] && return 0
+    local tuser
+    local tyes
+
+    while :
+    do
+        read -p "    请输入用户名: " tuser
+        echo -e "\n\t你输入的用户名是:[ ${tuser} ]\n"
+        read -p "    确认请输入y(其他值进行重新输入): " tyes
+        [[ "${tyes}x" = "yx" || "${tyes}x" = "Yx" ]] && break
+    done
+    ftpUser=${tuser}
+    #echo "ftpUser=[${ftpUser}]"
+
+    setUserFlag
+
+    return 0
+}
+
+function F_getPwd()
+{
+    [ ${pwdFlag} -eq 1 ] && return 0
+    local tPwd
+    local tyes
+
+    while :
+    do
+        read -p "    请输入密码: " tPwd
+        echo -e "\n\t你输入的密码是:[ ${tPwd} ]\n"
+        read -p "    确认请输入y(其他值进行重新输入): " tyes
+        [[ "${tyes}x" = "yx" || "${tyes}x" = "Yx" ]] && break
+    done
+    ftpPwd=${tPwd}
+    #echo "ftpPwd=[${ftpPwd}]"
+    setPwdFlag
+
+    return 0
+}
+
+
+function F_getPort()
+{
+    [ ${portFlag} -eq 1 ] && return 0
+    local tPort
+    local tyes
+
+    while :
+    do
+        read -p "    请输入端口号: " tPort
+        echo -e "\n\t你输入的端口号是:[ ${tPort} ]\n"
+        read -p "    确认请输入y(其他值进行重新输入): " tyes
+        [[ "${tyes}x" = "yx" || "${tyes}x" = "Yx" ]] && break
+    done
+    ftpCtlPort=${tPort}
+    #echo "ftpCtlPort=[${ftpCtlPort}]"
+    setPortFlag
+
+    return 0
+}
+
+function F_getTranType()
+{
+    [ ${trTypeFlag} -eq 1 ] && return 0
+    local tType
+    local tIdx
+
+    read -n 1 -p "    请选择传输模式,[1].ascii,其他值为默认的binary: " tIdx
+    if [ "x${tIdx}" = "x1" ];then
+        tType="ascii"
+    else
+        tType="binary"
+    fi 
+    echo -e "\n\t你选择的传输模式是:[ ${tType} ]\n"
+
+    transType=${tType}
+    #echo "transType=[${transType}]"
+    setTrTypeFlag
+
+    return 0
+}
+
+function F_getConMode()
+{
+    [ ${cnMdFlag} -eq 1 ] && return 0
+    local tmod
+    local tIdx
+
+    read -n 1 -p "    请选择连接方式,[1].active,其他值为默认的passive: " tIdx
+    if [ "x${tIdx}" = "x1" ];then
+       tmod="active"
+       conMode="-A"
+    else
+      tmod="passive"
+       conMode="-p"
+    fi 
+    echo -e "\n\t你选择的连接方式是:[ ${tmod} ]\n"
+    conMStr=${tmod}
+    setCnMdFlag
+
+    return 0
+}
+
+function F_getOthDefault()
+{
+    [ ${cnMdFlag} -eq 1 ] && return 0
+    [ ${trTypeFlag} -eq 1 ] && return 0
+    local tmod
+    local tType
+    local tip="
+    请选择下面的数字进行操作(直接回车默认选择0):
+            0. binary,passive
+            1. ascii, passive
+            2. 其他自定义操作
+            x. 退出操作
+        你的选择是: "
+    local tchoice
+
+    read -n 1 -p "$tip " tchoice
+    [ "x${tchoice}" = "xx" ]  && echo -e "\n" && exit 0
+    if [[ "x${tchoice}" = "x0" || "x${tchoice}" = "x" ]];then
+        tmod="passive"
+        conMode="-p"
+        tType="binary"
+    elif [ "x${tchoice}" = "x1" ];then
+        tmod="passive"
+        conMode="-p"
+        tType="ascii"
+    elif [ "x${tchoice}" = "x2" ];then
+        echo -e "\n"
+        return 0
+    fi
+
+    conMStr=${tmod}
+    transType=${tType}
+    setCnMdFlag
+    setTrTypeFlag
+
+    return 0
+}
+
+function F_genConTipStr()
+{
+
+    conTipStr="
+        连接信息如下:
+            ip         = [ ${ftpSerIp} ]
+            port       = [ ${ftpCtlPort} ]
+            user       = [ ${ftpUser} ]
+            pwd        = [ ${ftpPwd} ]
+            trans_type = [ ${transType} ]
+            con_mode   = [ ${conMStr} ]
+
+    "
+    return 0
+}
+
+function F_mainGet()
+{
+    local tip="
+    请选择下面的数字进行操作(直接回车默认从固定的选择):
+            0. 从默认固定的预定义中选择ip,用户,等信息
+            1. 自定义ip,用户等信息
+            x. 退出操作
+        你的选择是: "
+    local tchoice
+    while :
+    do
+        read -n 1 -p "$tip " tchoice
+        [ "x${tchoice}" = "xx" ]  && echo -e "\n" && exit 0
+
+        if [[ "x${tchoice}" = "x0" || "x${tchoice}" = "x" ]];then
+            echo -e "$fixPreStr"
+            F_getFixPre
+            F_getOthDefault
+            F_getTranType
+            F_getConMode
+            break
+        elif [ "x${tchoice}" = "x1" ];then
+
+            F_getip
+            F_getPort
+            F_getUser
+            F_getPwd
+            F_getOthDefault
+            F_getTranType
+            F_getConMode
+            
+            break
+        else
+            continue
+        fi
+    done
+
+    F_genConTipStr
+    echo -e "${conTipStr}"
+
+    return 0
+}
+
+function F_toConnect()
+{
+
+    #echo "user ${ftpUser} ${ftpPwd}
+    #prompt
+    #${transType}
+    #"|ftp  ${conMode} ${ftpSerIp} ${ftpCtlPort}
+
+    #expect \"ftp>*\"
+    #set timeout 10
+    #\"230*\" { send_user \"connet success !\r\";interact }
+
+    expect -c "
+    set timeout 1000
+    spawn ftp ${conMode} ${ftpSerIp} ${ftpCtlPort}  
+    expect \"Name*\"
+    send \"${ftpUser}\r\"
+    expect "*assword*"
+    send \"${ftpPwd}\r\"
+    expect {
+    \"530*\" { send_user \"connet error,will to exit !\r\";send \"bye\r\" }
+    \"230*\" { send_user \"connet success !\r\";send \"${transType}\r\" }
+    }
+    interact
+
+    "
+
+    return 0
+}
+
+function main()
+{
+    F_mainGet
+    F_toConnect
+    return 0
+}
+
+main
+
+exit 0
+

@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+#############################################################################
+#author       :    fushikai
+#date         :    20200704
+#linux_version:    Red Hat Enterprise Linux Server release 6.7
+#dsc          :
+#    统计scada的实时联接情况(需要在root在执行)
+#    
+#revision history:
+#       fushikai@20200714_10:13@created@v0.0.0.1
+#       
+#
+#############################################################################
+
+tUid="$(id -u)"
+
+if [ ${tUid} -ne 0 ];then
+    echo -e "\n\t请在\e[1;31mroot\e[0m用户下执行\n"
+    exit 1
+fi
+
+tHead="$(ss -antp|head -1)"
+watch -n 2 -d "echo -e \"\n\t以下展示scada的tcp连接情况 提示: Ctrl + c 退出此界面\n\";echo \"${tHead}\";ss -antp|grep CommSubsystem|grep -v \"127.0.0.1\""
+
+exit 0

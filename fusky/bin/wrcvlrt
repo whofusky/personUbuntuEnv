@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#############################################################################
+#author       :    fushikai
+#date         :    20200905
+#linux_version:    Ubuntu 20.04.1 LTS 
+#dsc          :
+#    
+#    
+#revision history:
+#
+#############################################################################
+
+#Èí¼þ°æ±¾ºÅ
+versionNo="software version number: v0.0.0.1"
+
+tDir="/home/fusky/DoChat/WeChat Files/fu_sky/FileStorage/File/$(date +%Y-%m)"
+
+if [ ! -d "${tDir}" ];then
+    echo -e "\n\tERROR: dir [ ${tDir} ] not exist!\n"
+    exit 1
+fi
+
+cd "${tDir}"
+if [ $# -gt 0 ];then
+    inPar="$1"
+    ls -lrt ${inPar}*
+else
+    ls -lrt
+fi
+
+exit 0
+

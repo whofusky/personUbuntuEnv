@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+#############################################################################
+#author       :    fushikai
+#date         :    20200704
+#linux_version:    Red Hat Enterprise Linux Server release 6.7
+#dsc          :
+#    查看scada日志中某个通道实时的报文日志(需要在root在执行)
+#    
+#revision history:
+#       fushikai@20200714_10:13@created@v0.0.0.1
+#       
+#
+#############################################################################
+
+
+function F_Tips()
+{
+    local cmd="$1"
+    echo -e "\nInput \e[1;31mERROR\e[0m please input like:"
+    echo -e "\t${cmd} <\e[0;31m通道号\e[0m> \t#实时查看通道号的报文\n"
+    return 0
+}
+
+if [ $# -ne 1 ];then
+    F_Tips "$0"
+    exit 1
+fi
+
+tChnlNo="$1"
+tNumFlag=$(echo "${tChnlNo}"|sed -n '/^\s*[0-9]\+\s*$/p'|wc -l)
+if [ ${tNumFlag} -lt 1 ];then
+    F_Tips "$0"
+    exit 1
+fi
+
+tHostName="${HOSTNAME}"
+tUid="$(id -u)"
+
+#echo "tHostName=[${tHostName}],tUid=[${tUid}]"
+if [ ${tUid} -ne 0 ];then
+    echo -e "\n\t请在\e[1;31mroot\e[0m用户下执行\n"
+    exit 1
+fi
+
+if [ "x${tHostName}" = "xfuskyPerson" ];then
+    tLogDir=/root/eclipse_proj/scada_workspace/CommSubsystem/trylog
+else
+    tLogDir=/zfmd/wpfs20/scada/trylog
+fi
+if [ ! -d "${tLogDir}" ];then
+    echo -e "\n\tscada的日志目录 [ ${tLogDir} ] 不存在\n"
+    exit 1
+fi
+
+tMaxChnNo=10
+exeBinDir="$(dirname ${tLogDir})"
+cfgFile="${exeBinDir}/scdCfg.xml"
+if [ -e "${cfgFile}" ];then
+    tMaxChnNo=$(sed -n '/^\s*<\s*channel\b/p' "${cfgFile}"|wc -l)
+fi
+
+if [ ${tChnlNo} -ge ${tMaxChnNo} ];then
+    echo -e "\n\t通道号 [ ${tChnlNo} ] 在scada中不存在\n"
+    exit 1
+fi
+
+cd "${tLogDir}"
+tNum=$(ls -1 *.txt 2>/dev/null|wc -l)
+if [ ${tNum} -lt 2 ];then
+    echo -e "\n\tscada日志目录[ ${tLogDir} ]中不存在 .txt的文件\n"
+    exit 1
+fi
+
+echo -e "\n\t提示: 要退出此界面请按 Ctrl + c 键"
+echo -e "\n\t下面将\e[1;31m实时\e[0m显示scada中通道\e[1;31m [ ${tChnlNo} ]\e[0m 的报文信息 ...\n"
+tail -f *.txt|grep "chnlNo=\[${tChnlNo}\]"|egrep "(r::|s::)"
+
+
+exit 0

@@ -1,0 +1,3 @@
+Opening in existing browser session.
+[0916/220321.214786:ERROR:nacl_helper_linux.cc(308)] NaCl helper process running without a sandbox!
+Most likely you need to configure your SUID sandbox correctly

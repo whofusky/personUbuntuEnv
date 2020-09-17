@@ -1,0 +1,3 @@
+(electron) The default value of app.allowRendererProcessReuse is deprecated, it is currently "false".  It will change to be "true" in Electron 9.  For more information please check https://github.com/electron/electron/issues/18397
+(node:70334) Electron: Loading non-context-aware native module in renderer: '/tmp/.org.chromium.Chromium.u7h1xu'. This is deprecated, see https://github.com/electron/electron/issues/18397.
+(node:70334) Electron: Loading non-context-aware native module in renderer: '/tmp/.org.chromium.Chromium.u7h1xu'. This is deprecated, see https://github.com/electron/electron/issues/18397.

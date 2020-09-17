@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+#############################################################################
+#author       :    fushikai
+#date         :    20200905
+#linux_version:    Ubuntu 20.04.1 LTS 
+#dsc          :
+#     用后台终端启动程序
+#    
+#revision history:
+#
+#############################################################################
+
+tExShName="$0"
+tShName="${tExShName##*/}"
+
+if [ $# -lt 1 ];then
+    echo -e "\n\t please input like: \e[1;31m${tShName} <program_name> [...]\e[0m\n"
+    exit 1
+fi
+
+inPars="$@"
+#echo -e "\n\tinPars=[${inPars}]\n"
+
+tProName="$1"
+which "${tProName}" >/dev/null
+stat=$?
+if [ ${stat} -ne 0 ];then
+    echo -e "\n\t\e[1;31m ${tProName} \e[0m not exist!\n"
+    exit 1
+fi
+
+#. /home/fusky/manualEnv/clash_proxy
+
+logPreName="${tProName##*/}"
+logFile="/home/fusky/log/mualTerStar/${logPreName}_$(date +%Y%m%d)"
+
+
+
+nohup ${inPars} >>${logFile} 2>&1 &
+
+echo -e "\n\tlogFile=[${logFile}]\n"
+
+exit 0
+
+

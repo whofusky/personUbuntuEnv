@@ -1,0 +1,6 @@
+(electron) The default value of app.allowRendererProcessReuse is deprecated, it is currently "false".  It will change to be "true" in Electron 9.  For more information please check https://github.com/electron/electron/issues/18397
+(node:4329) Electron: Loading non-context-aware native module in renderer: '/tmp/.org.chromium.Chromium.gE68Kv'. This is deprecated, see https://github.com/electron/electron/issues/18397.
+(node:4329) Electron: Loading non-context-aware native module in renderer: '/tmp/.org.chromium.Chromium.gE68Kv'. This is deprecated, see https://github.com/electron/electron/issues/18397.
+Opening in existing browser session.
+[0910/191325.229064:ERROR:nacl_helper_linux.cc(308)] NaCl helper process running without a sandbox!
+Most likely you need to configure your SUID sandbox correctly

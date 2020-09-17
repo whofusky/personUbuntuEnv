@@ -1,0 +1,11 @@
+#!/bin/sh
+
+tUid="$(id -u)"
+
+if [ ${tUid} -ne 0 ];then
+    echo -e "\n\t请在\e[1;31mroot\e[0m用户下执行\n"
+    exit 1
+fi
+
+pName=CommSubsystem
+pidof "${pName}" >/dev/null && ps -o user,pid,%cpu,%mem,vsz,rss,tty,stat,start,time,etime,command -p $(pidof "${pName}")

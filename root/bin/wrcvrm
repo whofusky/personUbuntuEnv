@@ -1,0 +1,88 @@
+#!/bin/bash
+
+#############################################################################
+#author       :    fushikai
+#date         :    20200905
+#linux_version:    Ubuntu 20.04.1 LTS 
+#dsc          :
+#    
+#    
+#revision history:
+#
+#############################################################################
+
+#Èí¼þ°æ±¾ºÅ
+versionNo="software version number: v0.0.0.1"
+
+tDir="/home/fusky/DoChat/WeChat Files/fu_sky/FileStorage/File/$(date +%Y-%m)"
+
+if [ ! -d "${tDir}" ];then
+    echo -e "\n\tERROR: dir [ ${tDir} ] not exist!\n"
+    exit 1
+fi
+
+exbin="$0"
+binName="${exbin##*/}"
+
+function F_tips()
+{
+    echo -e "\n\tERROR: input like: "
+    echo -e "\t\t${binName} <file>"
+    echo -e "\tor"
+    echo -e "\t\t${binName} -a <file> \n"
+    return 0
+}
+
+if [[ $# -ne 1 && $# -ne 2 ]];then
+    F_tips
+    exit 2
+fi
+
+tpartFlag=0
+tallFlag=0
+if [ $# -eq 1 ];then
+    if [ "$1" = "-a" ];then
+        tallFlag=1
+    else
+        inPar="$1"
+    fi
+else
+    if [ "$1" != "-a" ];then
+        F_tips
+        exit 2
+    fi
+    tpartFlag=1
+    inPar="$2"
+fi
+
+if [ ${tallFlag} -eq 0 ];then
+    if [ ${tpartFlag} -eq 1 ];then
+        ls -1 "${tDir}"/${inPar}* >/dev/null
+    else
+        ls -1 "${tDir}"/${inPar} >/dev/null
+    fi
+    stat=$?
+    [ ${stat} -ne 0 ] && exit ${stat}
+else
+    tnum=$(ls -1 "${tDir}"/* 2>/dev/null|wc -l)
+    if [ ${tnum} -eq 0 ];then
+        echo -e "\n\t TIPS: in dir [ ${tDir} ] No file\n"
+        exit 1
+    fi
+fi
+
+if [ ${tallFlag} -eq 0 ];then
+    if [ ${tpartFlag} -eq 1 ];then
+        echo "rm -r  ${tDir}/${inPar}* "
+        rm -r "${tDir}"/${inPar}* 
+    else
+        echo "rm -r ${tDir}/${inPar} "
+        rm -r "${tDir}"/${inPar} 
+    fi
+else
+    echo "rm -r ${tDir}/* "
+    rm -r "${tDir}"/* 
+fi
+
+exit 0
+
