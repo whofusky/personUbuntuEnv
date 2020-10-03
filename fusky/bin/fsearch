@@ -19,7 +19,9 @@ inExename="${tShName##*/}"
 
 function F_help()
 {
-    echo -e "\n\t${inExename} <YYYY-mm-dd HH24:MM:SS>\n"
+    echo -e "\n input \e[1;31mERROR:\e[0m please input like:"
+    echo -e "\t1. ${inExename} <YYYY-mm-dd HH24:MM:SS> #find the file at the time of xxx"
+    echo -e "\t2. ${inExename} -rm <YYYY-mm-dd HH24:MM:SS> #delete the file at the time of xxx\n"
     return 0
 }
 
@@ -28,14 +30,21 @@ if [ $# -lt 1 ];then
     exit 1
 fi
 
-inTm="$1"
 rmFlag=0
-if [ $# -ge 2 ];then
-    inrm="$2"
-    if [ "${inrm}x" = "rmx" ];then
+case $1 in
+    -rm)
         rmFlag=1
-    fi
-fi
+        shift
+        ;;
+    *)
+        rmFlag=0
+        ;;
+esac
+
+inTm="$1"
+
+#echo "inTm=[${inTm}],rmFlag=[${rmFlag}]"
+#exit 0
 
 tYYYY=""; tmm="" ; tdd=""  : tHH=""   : tMM=""; tSS="":
 aYm=""  ; aYmd=""; aYmdH=""; aYmdHM=""; aYmdHMS=""
