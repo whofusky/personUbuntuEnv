@@ -55,7 +55,7 @@ F_findSfNameByFile(){
         *.png|*.jpg|*.gif) 
             useSfName="viewnior"
             ;;
-        *.xlsx) 
+        *.xlsx|*.xls|*.csv) 
             useSfName="gnumeric"
             ;;
         *.docx) 

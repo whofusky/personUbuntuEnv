@@ -21,7 +21,9 @@ function F_help()
 {
     echo -e "\n input \e[1;31mERROR:\e[0m please input like:"
     echo -e "\t1. ${inExename} <YYYY-mm-dd HH24:MM:SS> #find the file at the time of xxx"
-    echo -e "\t2. ${inExename} -rm <YYYY-mm-dd HH24:MM:SS> #delete the file at the time of xxx\n"
+    echo -e "\t2. ${inExename} <YYYYmmddHH24MMSS> #find the file at the time of xxx"
+    echo -e "\t3. ${inExename} -rm <YYYY-mm-dd HH24:MM:SS> #delete the file at the time of xxx"
+    echo -e "\t4. ${inExename} -rm <YYYYmmddHH24MMSS> #delete the file at the time of xxx\n"
     return 0
 }
 

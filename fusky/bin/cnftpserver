@@ -388,7 +388,7 @@ function F_toConnect()
     #\"230*\" { send_user \"connet success !\r\";interact }
 
     expect -c "
-    set timeout 1000
+    set timeout 10
     spawn ftp ${conMode} ${ftpSerIp} ${ftpCtlPort}  
     expect \"Name*\"
     send \"${ftpUser}\r\"
