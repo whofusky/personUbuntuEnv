@@ -48,7 +48,7 @@ F_findSfNameByFile(){
         exit 1
     fi
     local fileName="$1"
-    case ${fileName} in
+    case "${fileName}" in
         *.pdf) 
             useSfName="evince"
             ;;
@@ -96,7 +96,7 @@ logFile="/home/fusky/log/mualTerStar/${logPreName}_$(date +%Y%m%d)"
 
 
 
-nohup ${useSfName} ${inFile} >>${logFile} 2>&1 &
+nohup ${useSfName} "${inFile}" >>${logFile} 2>&1 &
 
 echo -e "\n\t${useSfName} ${inFile}"
 echo -e "\tlogFile=[${logFile}]\n"
