@@ -52,13 +52,13 @@ F_findSfNameByFile(){
         *.pdf) 
             useSfName="evince"
             ;;
-        *.png|*.jpg|*.gif) 
+        *.png|*.jpg|*.gif|*.jpeg) 
             useSfName="viewnior"
             ;;
         *.xlsx|*.xls|*.csv) 
             useSfName="gnumeric"
             ;;
-        *.docx) 
+        *.docx|*.doc) 
             useSfName="wps"
             ;;
         *.txt|*.log|*.xml) 
