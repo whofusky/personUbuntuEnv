@@ -50,6 +50,8 @@ function chgOwnTofusky()
 	fi
 	return 0
 }
+#fusk test
+#exit 0
 
 num=$(${rpidof} -x ${allShName} 2>/dev/null|wc -l)
 if [ ${num} -gt 1 ];then
@@ -79,10 +81,11 @@ if [ ! -d "${tcfgDir}" ];then
 	exit 1
 fi
 
+binVersion=$(${tbin} -v|awk '{for(i=1;i<=NF;i++){if($i ~/v[0-9]+.[0-9]+.[0-9]+/){print $i;break;}}}');
 nohup ${tbin} -d ${tcfgDir} >>${outputLog} 2>&1 &
 chgOwnTofusky ${outputLog}
 
-echo "$(date +%Y-%m-%d_%H:%M:%S.%N): [ ${tbin} ] start to runing!">>${startLog}
+echo "$(date +%Y-%m-%d_%H:%M:%S.%N): [ ${tbin} ${binVersion} ] start to runing!">>${startLog}
 chgOwnTofusky ${startLog}
 
 exit 0

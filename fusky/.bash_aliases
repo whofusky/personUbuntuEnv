@@ -20,3 +20,7 @@ alias cdms='cd /home/fusky/manualStart'
 ## reading
 alias cddmt='cd /home/fusky/Documents'
 alias prd='mytstart evince'
+
+##git
+alias gb='git branch'
+alias gc='git checkout'
