@@ -287,18 +287,32 @@ function F_touchChlx()
 
     echo -e "\n\t正在更新通道[ ${inParChlNo} ] 需要的配置文件,\e[1;31m可能需要些许时间\e[0m，请稍候!\n"
 
+#    sed -n "/^\s*<\s*channel\b.*chnNum\s*=\s*\"\s*${inParChlNo}\s*\"/,/^\s*<\s*\/\s*channel\b/ {/\(^\s*<\s*[\/]*\s*phyObjVal\b\|^\s*<\s*pntAddr\b\|^\s*<\s*dataId\b\)/p;/^\s*<\s*\/\s*channel\b/q}" ${edFile}|sed 's/\(\s\+=\s*\|=\s\+\)/=/g'|awk -F'"' 'BEGIN{
+#    phyVal="0";calVal="0";scalVal="0";offsetVal="0";adds="";didName="";    
+#}
+#{
+#    for(i=1;i<=NF;i++){
+#            if($0 ~/^ *< *phyObjVal\>/  && $i ~/\<phyType\>/){phyVal=$(i+1);}
+#            if($0 ~/^ *< *phyObjVal\>/  && $i ~/\<calcMethd\>/){calVal=$(i+1);}
+#            if($0 ~/^ *< *phyObjVal\>/  && $i ~/\<scalFactor\>/){scalVal=$(i+1);}
+#            if($0 ~/^ *< *phyObjVal\>/  && $i ~/\<offsetCoe\>/){offsetVal=$(i+1);}
+#            if($0 ~/^ *< *pntAddr\>/ && $i ~/\<remoteAddr\>/){adds=adds $(i+1) ",";break;}
+#            if($0 ~/^ *< *dataId\>/ && $i ~/\<didName\>/){didName=$(i+1);break;}
+#            if($0 ~/^ *< *\/ *phyObjVal\>/){printf "%s|%s|%s|%s|%s|%s\n",phyVal,calVal,adds,didName,scalVal,offsetVal;phyVal="0";calVal="0";didName="";adds="";scalVal="1";offsetVal="0";break;}
+#        }
+#    }'|sed 's/,\s*|/|/g'>"${tmpFx}"
     sed -n "/^\s*<\s*channel\b.*chnNum\s*=\s*\"\s*${inParChlNo}\s*\"/,/^\s*<\s*\/\s*channel\b/ {/\(^\s*<\s*[\/]*\s*phyObjVal\b\|^\s*<\s*pntAddr\b\|^\s*<\s*dataId\b\)/p;/^\s*<\s*\/\s*channel\b/q}" ${edFile}|sed 's/\(\s\+=\s*\|=\s\+\)/=/g'|awk -F'"' 'BEGIN{
     phyVal="0";calVal="0";scalVal="0";offsetVal="0";adds="";didName="";    
 }
 {
     for(i=1;i<=NF;i++){
-            if($0 ~/^ *< *phyObjVal\>/  && $i ~/\<phyType\>/){phyVal=$(i+1);}
-            if($0 ~/^ *< *phyObjVal\>/  && $i ~/\<calcMethd\>/){calVal=$(i+1);}
-            if($0 ~/^ *< *phyObjVal\>/  && $i ~/\<scalFactor\>/){scalVal=$(i+1);}
-            if($0 ~/^ *< *phyObjVal\>/  && $i ~/\<offsetCoe\>/){offsetVal=$(i+1);}
-            if($0 ~/^ *< *pntAddr\>/ && $i ~/\<remoteAddr\>/){adds=adds $(i+1) ",";break;}
-            if($0 ~/^ *< *dataId\>/ && $i ~/\<didName\>/){didName=$(i+1);break;}
-            if($0 ~/^ *< *\/ *phyObjVal\>/){printf "%s|%s|%s|%s|%s|%s\n",phyVal,calVal,adds,didName,scalVal,offsetVal;phyVal="0";calVal="0";didName="";adds="";scalVal="1";offsetVal="0";break;}
+            if($0 ~/^ *< *phyObjVal +/  && $i ~/ +phyType *=/){phyVal=$(i+1);}
+            if($0 ~/^ *< *phyObjVal +/  && $i ~/ +calcMethd *=/){calVal=$(i+1);}
+            if($0 ~/^ *< *phyObjVal +/  && $i ~/ +scalFactor *=/){scalVal=$(i+1);}
+            if($0 ~/^ *< *phyObjVal +/  && $i ~/ +offsetCoe *=/){offsetVal=$(i+1);}
+            if($0 ~/^ *< *pntAddr +/ && $i ~/ +remoteAddr *=/){adds=adds $(i+1) ",";break;}
+            if($0 ~/^ *< *dataId +/ && $i ~/ +didName *=/){didName=$(i+1);break;}
+            if($0 ~/^ *< *\/ *phyObjVal *> */){printf "%s|%s|%s|%s|%s|%s\n",phyVal,calVal,adds,didName,scalVal,offsetVal;phyVal="0";calVal="0";didName="";adds="";scalVal="1";offsetVal="0";break;}
         }
     }'|sed 's/,\s*|/|/g'>"${tmpFx}"
 
@@ -331,11 +345,11 @@ function F_prtSome()
         cmdStr="awk -F| -f ${awkCmdFile} ${tmpFx}"
     elif [ ${addFlag} -eq 1 ];then
         fieldNo='$3'
-        echo "{if(${fieldNo} ~/\<${opVal}\>/){print ${prtNo};}}">${awkCmdFile}
+        echo "{if(${fieldNo} ~/(^|,)${opVal}($|,)/){print ${prtNo};}}">${awkCmdFile}
         cmdStr="awk -F| -f ${awkCmdFile} ${tmpFx}"
     elif [ ${calFlag} -eq 1 ];then
         fieldNo='$2'
-        echo "{if(${fieldNo} ~/\<${opVal}\>/){print ${prtNo};}}">${awkCmdFile}
+        echo "{if(${fieldNo} ~/(^|,)${opVal}($|,)/){print ${prtNo};}}">${awkCmdFile}
         cmdStr="awk -F| -f ${awkCmdFile} ${tmpFx}"
     elif [ ${mulFlag} -eq 1 ];then
         fieldNo='$5'
